@@ -21,7 +21,7 @@ export default function Home() {
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">vvyiii</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Otter Verify</h1>
           <p className="text-muted-foreground mt-1">
             Next.js + Tailwind + shadcn/ui 原型脚手架,可以开始搭产品概念了。
           </p>

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "vvyiii",
+  title: "Otter Verify",
   description: "Product concept prototype built with Next.js and shadcn/ui",
 };
 

@@ -1,8 +1,7 @@
 # Cloudflare Worker config for the company Data Console Applications platform.
 # Assets-only Worker: serves the static export from `next build` (the `out/` dir).
-# Rename "internal-vvyiii" if you pick a different slug in Data Console
-# (the Worker name must be "internal-<slug>").
-name = "internal-vvyiii"
+# The Worker name must be "internal-<slug>", matching the Data Console slug.
+name = "internal-otter-verify"
 compatibility_date = "2026-10-07"
 
 [assets]
