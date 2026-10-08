@@ -137,13 +137,126 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Kiosk notification: slides in from the right edge of the stage. */
-@keyframes kiosk-slide-in {
+/*
+ * Kiosk motion system: one easing, entrances settle (~250–300ms), exits get
+ * out of the way (~180–200ms). Utility classes pair with components/kiosk.
+ */
+:root {
+  --kiosk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes kiosk-fade-in {
   from {
+    opacity: 0;
+  }
+}
+@keyframes kiosk-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes kiosk-tick-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em);
+  }
+}
+@keyframes kiosk-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes kiosk-land-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+@keyframes kiosk-frame-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes kiosk-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(100% + 16px));
+  }
+}
+@keyframes kiosk-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(100% + 16px));
+  }
+}
+@keyframes kiosk-note-in {
+  from {
+    opacity: 0;
     transform: translateX(calc(100% + 24px));
   }
+}
+@keyframes kiosk-note-out {
   to {
-    transform: translateX(0);
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+  }
+}
+@keyframes kiosk-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes kiosk-sheet-out {
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+.kiosk-enter-fade {
+  animation: kiosk-fade-in 220ms var(--kiosk-ease) both;
+}
+.kiosk-exit-fade {
+  animation: kiosk-fade-out 180ms ease-in forwards;
+}
+.kiosk-enter-tick {
+  animation: kiosk-tick-in 240ms var(--kiosk-ease) both;
+}
+.kiosk-enter-rise {
+  animation: kiosk-rise-in 280ms var(--kiosk-ease) both;
+}
+.kiosk-enter-land {
+  animation: kiosk-land-in 250ms var(--kiosk-ease) both;
+}
+.kiosk-enter-frame {
+  animation: kiosk-frame-in 220ms var(--kiosk-ease) both;
+}
+.kiosk-enter-toast {
+  animation: kiosk-toast-in 300ms var(--kiosk-ease) both;
+}
+.kiosk-exit-toast {
+  animation: kiosk-toast-out 200ms ease-in forwards;
+}
+.kiosk-enter-note {
+  animation: kiosk-note-in 300ms var(--kiosk-ease) both;
+}
+.kiosk-exit-note {
+  animation: kiosk-note-out 200ms ease-in forwards;
+}
+.kiosk-enter-sheet {
+  animation: kiosk-sheet-in 260ms var(--kiosk-ease) both;
+}
+.kiosk-exit-sheet {
+  animation: kiosk-sheet-out 180ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="kiosk-enter-"],
+  [class*="kiosk-exit-"] {
+    animation-duration: 1ms !important;
   }
 }
 

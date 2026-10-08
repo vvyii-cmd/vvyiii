@@ -265,6 +265,19 @@ stage. Detection-frame label pills are always black, colored text, and sit
   the Undo notification is visible; the brief says the counter goes to 8/8 and
   completion immediately. Per ground rules the brief wins — the build shows
   completion with the Undo notification on top.
+- **Motion system**: one easing (`cubic-bezier(0.22,1,0.36,1)`), entrances
+  settle (~250–300ms), exits get out of the way (~180–200ms). Action toasts
+  slide up from the bottom edge and slide back out; content changes crossfade
+  without re-sliding the card. Notifications slide in and out on the right.
+  Mat objects land with a small settle and fade off; detection frames fade in
+  and morph smoothly as their contents change. The sheet floats up over a
+  fading mask. Panel states crossfade (empty ↔ order ↔ completion), counters
+  tick in with a rise, completion colors transition. `prefers-reduced-motion`
+  collapses all of it.
+- **Beat sequencing (demo)**: a step that places or removes several objects
+  plays one object per ~600ms beat, so the scene reads like a real packer —
+  including the honest intermediate states (e.g. "1 of 2" amber while the
+  second sandwich is still in hand).
 - **Demo shell** (Phase 2): URL deep links `/?flow=04&step=2&branch=extra`
   replay the script; keyboard → next, ← prev, R reset, 1–5 switch flow;
   branching steps surface as branch buttons at the branch point; kiosk-gesture

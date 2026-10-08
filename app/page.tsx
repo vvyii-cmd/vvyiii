@@ -21,6 +21,9 @@ import type {
 
 const { ingress } = createKdsIntegratedIngress();
 
+/** Pause between individual placements so a step plays like a real scene. */
+const BEAT_MS = 600;
+
 type HistEntry = { state: SessionState; step: number; branchId?: string };
 
 const INITIAL: HistEntry = { state: initialState, step: 0 };
@@ -37,6 +40,27 @@ function applyEvents(base: SessionState, events: VerifyEvent[]) {
   return { state, outbound, now };
 }
 
+/**
+ * One beat = one physical action. A step that places or removes several
+ * objects plays them one at a time, like a real packer would.
+ */
+function expandBeats(events: VerifyEvent[]): VerifyEvent[] {
+  const beats: VerifyEvent[] = [];
+  for (const e of events) {
+    if (
+      (e.type === "PLACE" || e.type === "PLACE_UNRECOGNIZED") &&
+      e.placements.length > 1
+    ) {
+      for (const p of e.placements) beats.push({ ...e, placements: [p] });
+    } else if (e.type === "REMOVE" && e.qty > 1) {
+      for (let i = 0; i < e.qty; i++) beats.push({ ...e, qty: 1 });
+    } else {
+      beats.push(e);
+    }
+  }
+  return beats;
+}
+
 /** Does a kiosk gesture fulfil the current step's scripted screen event? */
 function fulfils(step: VerifyEvent, done: ScreenEvent): boolean {
   if (step.type !== done.type) return false;
@@ -51,7 +75,9 @@ export default function DemoPage() {
   const [flow, setFlow] = React.useState<Flow>(FLOWS[0]);
   const [history, setHistory] = React.useState<HistEntry[]>([INITIAL]);
   const [outbound, setOutbound] = React.useState<OutboundLogEntry[]>([]);
+  const [busy, setBusy] = React.useState(false);
   const seqRef = React.useRef(0);
+  const timersRef = React.useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const current = history[history.length - 1];
   const steps = effectiveSteps(flow, current.branchId);
@@ -65,18 +91,57 @@ export default function DemoPage() {
     setOutbound((prev) => [...entries.reverse(), ...prev]);
   };
 
+  const cancelBeats = React.useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setBusy(false);
+  }, []);
+
+  React.useEffect(() => cancelBeats, [cancelBeats]);
+
+  /** Apply one beat; the first beat of a step pushes the step's history entry. */
+  const applyBeat = React.useCallback(
+    (event: VerifyEvent, first: boolean, last: boolean) => {
+      setHistory((h) => {
+        const top = h[h.length - 1];
+        const { state, outbound: out, now } = applyEvents(top.state, [event]);
+        log(out, now);
+        const entry: HistEntry = {
+          state,
+          step: last ? top.step + 1 : top.step,
+          branchId: top.branchId,
+        };
+        return first ? [...h, entry] : [...h.slice(0, -1), entry];
+      });
+    },
+    [],
+  );
+
   const fireNext = React.useCallback(() => {
-    setHistory((h) => {
-      const top = h[h.length - 1];
-      const step = effectiveSteps(flow, top.branchId)[top.step];
-      if (!step) return h;
-      const { state, outbound: out, now } = applyEvents(top.state, step.events);
-      log(out, now);
-      return [...h, { state, step: top.step + 1, branchId: top.branchId }];
+    if (busy) return;
+    const top = history[history.length - 1];
+    const step = effectiveSteps(flow, top.branchId)[top.step];
+    if (!step) return;
+    const beats = expandBeats(step.events);
+    if (beats.length === 1) {
+      applyBeat(beats[0], true, true);
+      return;
+    }
+    setBusy(true);
+    beats.forEach((beat, i) => {
+      const t = setTimeout(() => {
+        applyBeat(beat, i === 0, i === beats.length - 1);
+        if (i === beats.length - 1) {
+          timersRef.current = [];
+          setBusy(false);
+        }
+      }, i * BEAT_MS);
+      timersRef.current.push(t);
     });
-  }, [flow]);
+  }, [busy, history, flow, applyBeat]);
 
   const selectBranch = (branchId: string) => {
+    if (busy) return;
     setHistory((h) => {
       const top = h[h.length - 1];
       return [...h, { ...top, branchId }];
@@ -84,34 +149,35 @@ export default function DemoPage() {
   };
 
   const dispatchScreen = (event: ScreenEvent) => {
-    setHistory((h) => {
-      const top = h[h.length - 1];
-      const step = effectiveSteps(flow, top.branchId)[top.step];
-      const { state, outbound: out, now } = applyEvents(top.state, [event]);
-      log(out, now);
-      if (step && step.events.length === 1 && fulfils(step.events[0], event)) {
-        return [...h, { state, step: top.step + 1, branchId: top.branchId }];
-      }
-      return [...h.slice(0, -1), { ...top, state }];
-    });
+    const top = history[history.length - 1];
+    const step = busy
+      ? undefined
+      : effectiveSteps(flow, top.branchId)[top.step];
+    const advances =
+      !!step && step.events.length === 1 && fulfils(step.events[0], event);
+    applyBeat(event, advances, advances);
   };
 
   const reset = React.useCallback(() => {
+    cancelBeats();
     setHistory([INITIAL]);
     setOutbound([]);
-  }, []);
+  }, [cancelBeats]);
 
   const selectFlow = React.useCallback(
     (next: Flow) => {
+      cancelBeats();
       setFlow(next);
-      reset();
+      setHistory([INITIAL]);
+      setOutbound([]);
     },
-    [reset],
+    [cancelBeats],
   );
 
   const prev = React.useCallback(() => {
+    cancelBeats();
     setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h));
-  }, []);
+  }, [cancelBeats]);
 
   // Deep link: /?flow=04&step=2&branch=extra — replay the script up to `step`.
   const hydrated = React.useRef(false);
@@ -124,34 +190,35 @@ export default function DemoPage() {
     if (!target) return;
     // Replay asynchronously: this is one-time URL hydration, not render logic.
     const timer = setTimeout(() => {
-    const branchId =
-      target.branches?.find((b) => b.id === params.get("branch"))?.id ?? undefined;
-    const script = effectiveSteps(target, branchId);
-    const step = Math.min(
-      Math.max(parseInt(params.get("step") ?? "0", 10) || 0, 0),
-      script.length,
-    );
-    const entries: HistEntry[] = [INITIAL];
-    let state: SessionState = initialState;
-    for (let i = 0; i < step; i++) {
-      // The branch choice happens after the trunk, before its first step fires.
-      if (branchId && i === target.steps.length) {
-        entries.push({ state, step: i, branchId });
+      const branchId =
+        target.branches?.find((b) => b.id === params.get("branch"))?.id ??
+        undefined;
+      const script = effectiveSteps(target, branchId);
+      const step = Math.min(
+        Math.max(parseInt(params.get("step") ?? "0", 10) || 0, 0),
+        script.length,
+      );
+      const entries: HistEntry[] = [INITIAL];
+      let state: SessionState = initialState;
+      for (let i = 0; i < step; i++) {
+        // The branch choice happens after the trunk, before its first step.
+        if (branchId && i === target.steps.length) {
+          entries.push({ state, step: i, branchId });
+        }
+        const r = applyEvents(state, script[i].events);
+        state = r.state;
+        log(r.outbound, r.now);
+        entries.push({
+          state,
+          step: i + 1,
+          branchId: i + 1 > target.steps.length ? branchId : undefined,
+        });
       }
-      const r = applyEvents(state, script[i].events);
-      state = r.state;
-      log(r.outbound, r.now);
-      entries.push({
-        state,
-        step: i + 1,
-        branchId: i + 1 > target.steps.length ? branchId : undefined,
-      });
-    }
-    if (branchId && step === target.steps.length) {
-      entries.push({ state, step, branchId });
-    }
-    setFlow(target);
-    setHistory(entries);
+      if (branchId && step === target.steps.length) {
+        entries.push({ state, step, branchId });
+      }
+      setFlow(target);
+      setHistory(entries);
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -175,8 +242,8 @@ export default function DemoPage() {
       else if (e.key === "ArrowLeft") prev();
       else if (e.key === "r" || e.key === "R") reset();
       else if (/^[1-5]$/.test(e.key)) {
-        const target = FLOWS[Number(e.key) - 1];
-        if (target) selectFlow(target);
+        const next = FLOWS[Number(e.key) - 1];
+        if (next) selectFlow(next);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -202,6 +269,7 @@ export default function DemoPage() {
           currentIndex={current.step}
           branchId={current.branchId}
           atBranchPoint={atBranchPoint}
+          busy={busy}
           onSelectBranch={selectBranch}
           onFire={fireNext}
           onPrev={prev}

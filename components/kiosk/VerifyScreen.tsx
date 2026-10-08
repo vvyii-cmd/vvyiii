@@ -10,6 +10,7 @@ import {
   detectionFrames,
   matObjects,
 } from "@/lib/verify/selectors";
+import { Crossfade, useListPresence } from "./motion";
 import { KioskHeader } from "./KioskHeader";
 import { EmptyState } from "./EmptyState";
 import { OrderPanel } from "./OrderPanel";
@@ -34,13 +35,21 @@ export function VerifyScreen({
   ingress: OrderIngress;
   dispatch: (e: ScreenEvent) => void;
 }) {
-  const frames = detectionFrames(state);
-  const toast = activeToast(state);
+  // Selector results are memoized per state so the presence hooks (which
+  // compare by identity) settle instead of re-rendering forever.
+  const liveObjects = React.useMemo(() => matObjects(state), [state]);
+  const liveFrames = React.useMemo(() => detectionFrames(state), [state]);
+  const toast = React.useMemo(() => activeToast(state), [state]);
+  const objects = useListPresence(liveObjects, (o) => o.id, 200);
+  const frames = useListPresence(liveFrames, (f) => f.key, 180);
   const notification = state.phase === "idle" ? undefined : state.notification;
-  const sheetLine =
-    state.phase === "packing" && state.activeSheetLineId
-      ? state.lines.find((l) => l.id === state.activeSheetLineId)
-      : undefined;
+  const sheetLine = React.useMemo(
+    () =>
+      state.phase === "packing" && state.activeSheetLineId
+        ? state.lines.find((l) => l.id === state.activeSheetLineId)
+        : undefined,
+    [state],
+  );
 
   // Optional dwell prompt (off by default, see lib/verify/config.ts).
   React.useEffect(() => {
@@ -77,11 +86,11 @@ export function VerifyScreen({
 
       {/* Physical objects and detection frames live on the canvas layer. */}
       <div className="pointer-events-none absolute inset-0">
-        {matObjects(state).map((o) => (
-          <MatObject key={o.id} object={o} />
+        {objects.map((e) => (
+          <MatObject key={e.key} object={e.item} exiting={e.exiting} />
         ))}
-        {frames.map((f) => (
-          <DetectionFrame key={f.key} model={f} />
+        {frames.map((e) => (
+          <DetectionFrame key={e.key} model={e.item} exiting={e.exiting} />
         ))}
       </div>
 
@@ -90,39 +99,42 @@ export function VerifyScreen({
       </div>
 
       <div className="relative z-10 flex min-h-0 w-full flex-1 items-center gap-3 px-4 pt-2 pb-4">
-        {state.phase === "idle" ? (
-          <EmptyState
-            title={ingress.emptyState.title}
-            subtitle={ingress.emptyState.subtitle}
-          />
-        ) : (
-          <OrderPanel
-            order={state.order}
-            lines={state.lines}
-            phase={state.phase}
-            recordedAt={state.phase === "complete" ? state.recordedAt : undefined}
-            activeSheetLineId={
-              state.phase === "packing" ? state.activeSheetLineId : undefined
-            }
-            swapPendingLineId={
-              // The line strikes through once the replacement is on the mat.
-              state.phase === "packing" &&
-              state.mat.some((o) => o.match === "pending_swap")
-                ? state.swapPendingLineId
-                : undefined
-            }
-            dispatch={dispatch}
-          />
-        )}
+        <Crossfade
+          id={state.phase === "idle" ? "empty" : "order"}
+          className="h-full w-[281px] shrink-0"
+        >
+          {state.phase === "idle" ? (
+            <EmptyState
+              title={ingress.emptyState.title}
+              subtitle={ingress.emptyState.subtitle}
+            />
+          ) : (
+            <OrderPanel
+              order={state.order}
+              lines={state.lines}
+              phase={state.phase}
+              recordedAt={state.phase === "complete" ? state.recordedAt : undefined}
+              activeSheetLineId={
+                state.phase === "packing" ? state.activeSheetLineId : undefined
+              }
+              swapPendingLineId={
+                // The line strikes through once the replacement is on the mat.
+                state.phase === "packing" &&
+                state.mat.some((o) => o.match === "pending_swap")
+                  ? state.swapPendingLineId
+                  : undefined
+              }
+              dispatch={dispatch}
+            />
+          )}
+        </Crossfade>
         <CameraStage complete={state.phase === "complete"}>
-          {toast ? <ActionToast toast={toast} /> : null}
-          {notification ? (
-            <Notification notification={notification} dispatch={dispatch} />
-          ) : null}
+          <ActionToast toast={toast} />
+          <Notification notification={notification} dispatch={dispatch} />
         </CameraStage>
       </div>
 
-      {sheetLine ? <WhatHappenedSheet line={sheetLine} dispatch={dispatch} /> : null}
+      <WhatHappenedSheet line={sheetLine} dispatch={dispatch} />
     </div>
   );
 }

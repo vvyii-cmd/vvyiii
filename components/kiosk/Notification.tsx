@@ -1,5 +1,9 @@
+"use client";
+
 import { Check } from "lucide-react";
+import { cn } from "cn";
 import type { Notification as NotificationModel, ScreenEvent } from "@/lib/verify/types";
+import { usePresence } from "./motion";
 
 function copy(n: NotificationModel): { title: string; subtitle: string } {
   switch (n.kind) {
@@ -19,24 +23,29 @@ function copy(n: NotificationModel): { title: string; subtitle: string } {
 }
 
 /**
- * Status notification: slides in from the top-right of the stage (designer
- * decision). Carries an Undo button while a human-confirmed check can still
- * be reverted.
+ * Status notification: slides in from the right edge of the stage and slides
+ * back out when superseded. Carries an Undo button while a human-confirmed
+ * check can still be reverted.
  */
 export function Notification({
   notification,
   dispatch,
 }: {
-  notification: NotificationModel;
+  notification: NotificationModel | undefined;
   dispatch: (e: ScreenEvent) => void;
 }) {
-  const key = `${notification.kind}:${"itemName" in notification ? notification.itemName : ""}`;
-  const { title, subtitle } = copy(notification);
+  const { item, exiting } = usePresence(notification, 200);
+  if (!item) return null;
+  const key = `${item.kind}:${"itemName" in item ? item.itemName : ""}`;
+  const { title, subtitle } = copy(item);
 
   return (
     <div
       key={key}
-      className="absolute top-0 right-0 flex max-w-full animate-[kiosk-slide-in_300ms_ease-out] items-center gap-4 overflow-clip rounded-[10px] border border-kiosk-border bg-kiosk-card px-3 py-2"
+      className={cn(
+        "absolute top-0 right-0 flex max-w-full items-center gap-4 overflow-clip rounded-[10px] border border-kiosk-border bg-kiosk-card px-3 py-2",
+        exiting ? "kiosk-exit-note" : "kiosk-enter-note",
+      )}
       data-testid="notification"
     >
       <div className="flex w-[376px] max-w-full items-start gap-3">
@@ -50,7 +59,7 @@ export function Notification({
           </p>
         </div>
       </div>
-      {notification.kind === "checked_by_you" ? (
+      {item.kind === "checked_by_you" ? (
         <button
           type="button"
           onClick={() => dispatch({ type: "UNDO" })}

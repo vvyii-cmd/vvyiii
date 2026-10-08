@@ -1,6 +1,7 @@
 import { Repeat, ShieldCheck } from "lucide-react";
 import { cn } from "cn";
 import type { LineItem } from "@/lib/verify/types";
+import { Tick } from "./motion";
 
 /** A single resolved row inside the Checked zone / completion list. */
 export function CheckedRow({ line }: { line: LineItem }) {
@@ -63,14 +64,16 @@ export function CheckedZone({ lines }: { lines: LineItem[] }) {
   const count = lines.reduce((n, l) => n + l.qty, 0);
   const latest = lines[0];
   return (
-    <div className="flex w-full flex-col gap-[2px] border-t border-dashed border-border bg-kiosk-green-surface px-3 pt-2 pb-2 shadow-[0_-3px_10px_-6px_rgba(0,0,0,0.08)]">
+    <div className="kiosk-enter-rise flex w-full flex-col gap-[2px] border-t border-dashed border-border bg-kiosk-green-surface px-3 pt-2 pb-2 shadow-[0_-3px_10px_-6px_rgba(0,0,0,0.08)]">
       <div className="flex w-full items-center gap-1">
         <ShieldCheck className="size-4 text-foreground" />
         <p className="text-sm leading-5 font-semibold text-foreground">
-          Checked ({count})
+          Checked (<Tick value={count} />)
         </p>
       </div>
-      <CheckedRow line={latest} />
+      <div key={latest.id} className="kiosk-enter-tick flex w-full flex-col gap-[2px]">
+        <CheckedRow line={latest} />
+      </div>
       {lines.length > 1 ? (
         <p className="pl-5 text-sm leading-5 text-muted-foreground">...</p>
       ) : null}

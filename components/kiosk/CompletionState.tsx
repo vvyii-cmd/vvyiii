@@ -16,7 +16,7 @@ export function CompletionState({
   const total = lines.reduce((n, l) => n + l.qty, 0);
   return (
     <>
-      <div className="flex w-full flex-col gap-1 px-4 py-5">
+      <div className="kiosk-enter-rise flex w-full flex-col gap-1 px-4 py-5">
         <p className="text-[22px] leading-[26.4px] font-medium tracking-[-0.5px] text-kiosk-green">
           All {total} checked
         </p>
@@ -24,7 +24,7 @@ export function CompletionState({
           Recorded • {recordedAt}
         </p>
       </div>
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-[2px] border-t border-dashed border-[#d4d4d4] px-3 pt-2 pb-2">
+      <div className="kiosk-enter-rise flex min-h-0 w-full flex-1 flex-col gap-[2px] border-t border-dashed border-[#d4d4d4] px-3 pt-2 pb-2">
         <div className="flex w-full items-center gap-1">
           <ShieldCheck className="size-4 text-foreground" />
           <p className="text-sm leading-5 font-semibold text-foreground">

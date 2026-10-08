@@ -5,6 +5,7 @@ import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import type { LineItem, Order, ScreenEvent } from "@/lib/verify/types";
 import { checkedLines } from "@/lib/verify/selectors";
+import { Crossfade, Tick } from "./motion";
 import { ItemRow } from "./ItemRow";
 import { CheckedZone } from "./CheckedZone";
 import { CompletionState } from "./CompletionState";
@@ -121,7 +122,7 @@ export function OrderPanel({
   return (
     <div
       className={cn(
-        "relative flex h-full w-[281px] shrink-0 flex-col items-start overflow-clip rounded-[10px] border border-border shadow-xl",
+        "relative flex h-full w-[281px] shrink-0 flex-col items-start overflow-clip rounded-[10px] border border-border shadow-xl transition-colors duration-500",
         showComplete ? "bg-[rgba(240,253,244,0.85)]" : "bg-white/90",
       )}
     >
@@ -153,6 +154,7 @@ export function OrderPanel({
         >
           <span
             className={cn(
+              "transition-colors duration-500",
               showComplete
                 ? "text-kiosk-green"
                 : shownResolved > 0
@@ -160,17 +162,23 @@ export function OrderPanel({
                   : "text-muted-foreground",
             )}
           >
-            {showComplete ? total : shownResolved}
+            <Tick value={showComplete ? total : shownResolved} />
           </span>
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">{total}</span>
         </div>
       </div>
 
+      <Crossfade
+        id={showComplete ? "done" : "packing"}
+        className="flex min-h-0 w-full flex-1 flex-col"
+      >
       {showComplete && recordedAt ? (
-        <CompletionState lines={lines} recordedAt={recordedAt} />
+        <div className="flex h-full w-full flex-col">
+          <CompletionState lines={lines} recordedAt={recordedAt} />
+        </div>
       ) : (
-        <>
+        <div className="flex h-full w-full flex-col">
           <div className="flex min-h-0 w-full flex-1 flex-col gap-1 overflow-y-auto px-3 pt-2">
             {openRows.map((l) => {
               const stage = leaving.get(l.id);
@@ -209,8 +217,9 @@ export function OrderPanel({
             })}
           </div>
           <CheckedZone lines={checkedRows} />
-        </>
+        </div>
       )}
+      </Crossfade>
     </div>
   );
 }

@@ -16,13 +16,14 @@ export function CameraStage({
   children?: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        "relative h-full min-w-0 flex-1",
-        complete &&
-          "rounded-[8px] border-2 border-kiosk-green-outline bg-[rgba(134,239,172,0.1)]",
-      )}
-    >
+    <div className="relative h-full min-w-0 flex-1">
+      {/* Whole-order completion outline fades in over the stage. */}
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-[8px] border-2 border-kiosk-green-outline bg-[rgba(134,239,172,0.1)] transition-opacity duration-500",
+          complete ? "opacity-100" : "opacity-0",
+        )}
+      />
       <div className="absolute top-0 right-0 flex items-center gap-3 rounded-[10px] bg-black/40 shadow-2xl">
         <Button
           variant="ghost"
