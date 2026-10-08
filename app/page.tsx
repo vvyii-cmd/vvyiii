@@ -23,7 +23,7 @@ export default function Home() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Otter Verify</h1>
           <p className="text-muted-foreground mt-1">
-            Next.js + Tailwind + shadcn/ui 原型脚手架,可以开始搭产品概念了。
+            Next.js + Tailwind + shadcn/ui prototype starter, ready to build on.
           </p>
         </div>
         <Badge variant="secondary">prototype</Badge>
@@ -33,38 +33,39 @@ export default function Home() {
 
       <Tabs defaultValue="form" className="w-full">
         <TabsList>
-          <TabsTrigger value="form">表单示例</TabsTrigger>
-          <TabsTrigger value="components">组件预览</TabsTrigger>
+          <TabsTrigger value="form">Form example</TabsTrigger>
+          <TabsTrigger value="components">Components</TabsTrigger>
         </TabsList>
 
         <TabsContent value="form" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>新建概念</CardTitle>
+              <CardTitle>New concept</CardTitle>
               <CardDescription>
-                一个用 shadcn/ui 组件搭的示例表单,直接改这里开始做原型。
+                A sample form built with shadcn/ui components — edit this page
+                to start prototyping.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">名称</Label>
-                <Input id="name" placeholder="给你的概念起个名字" />
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" placeholder="Give your concept a name" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">描述</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  placeholder="这个产品概念解决什么问题?"
+                  placeholder="What problem does this concept solve?"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Switch id="public" />
-                <Label htmlFor="public">对团队可见</Label>
+                <Label htmlFor="public">Visible to team</Label>
               </div>
             </CardContent>
             <CardFooter className="gap-2">
-              <Button>创建</Button>
-              <Button variant="outline">取消</Button>
+              <Button>Create</Button>
+              <Button variant="outline">Cancel</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -72,10 +73,10 @@ export default function Home() {
         <TabsContent value="components" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>已安装的组件</CardTitle>
+              <CardTitle>Installed components</CardTitle>
               <CardDescription>
-                components/ui/ 下还有 dialog、dropdown-menu、select、tooltip
-                等,用 npx shadcn add 可以继续加。
+                More live in components/ui/ (dialog, dropdown-menu, select,
+                tooltip, …) — add others with npx shadcn add.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3">
@@ -89,7 +90,7 @@ export default function Home() {
               <Badge>Badge</Badge>
               <Badge variant="outline">Outline</Badge>
               <Avatar>
-                <AvatarFallback>YW</AvatarFallback>
+                <AvatarFallback>VW</AvatarFallback>
               </Avatar>
             </CardContent>
           </Card>
