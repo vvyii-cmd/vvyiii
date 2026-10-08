@@ -60,7 +60,7 @@ Stage overlays (toasts, sheet, CTA) use the **dark mode values** of the same sha
 | Token | Value | Semantics (matches brief §3.4) |
 |---|---|---|
 | `tw-raw/red/400` | `#f87171` | wrong/extra on stage: frames, frame badges, toast title+icon |
-| `tw-raw/orange/300` | `#fdba74` | amber "put more / swap pending" toasts & frames |
+| `tw-raw/orange/300` | `#fdba74` | amber = multi-quantity partial counts only (flow 04 frames, toasts, pills). NOT for swap — swap is neutral gray (designer decision, see §7.3) |
 | `tw-raw/green/700` | `#15803d` | "All N checked", counter numerator at completion |
 | `tw-raw/green/50` | `#f0fdf4` | Checked-zone bg (open state); completion panel bg is `rgba(240,253,244,0.85)` |
 | green/300 | `#86efac` | completion stage outline (`border-2`, fill `rgba(134,239,172,0.1)`) |
@@ -118,7 +118,7 @@ Production components (`components/kiosk/*`), with observed states:
 - **DetectionFrame (Alert frame)** — dashed **3px**, radius 10, fill black/15. Variants: red `#f87171`, amber `#fdba74`, neutral `#404040` (pending swap — see ambiguity #3).
 - **Frame badge** — pill overlapping frame's top-left (offset ~−9px up), px-8 py-2, 12 semibold; text in frame color; bg is color blended over black (on-stage) e.g. "Apple Pie", "1 of 3 • Biscuit", "4 of 3 • Biscuit" (bullet `•`).
 - **ActionToast (Card - Nova)** — bottom of stage, full stage width (475), bg `#262626`, border `#404040`, radius 14, p-16. Icon tile 48×48 radius 10 (bg red-400 / orange-300 / `#f5f5f5`-on-neutral), icon 24 dark. Title 18 medium in accent color; sub 14 regular `#a3a3a3`. Optional count pill right-aligned: "1 of 3" (amber, bg `#404040`) / "4 of 3" (red tones).
-- **StatusToast (Alert - Nova)** — **top-left of stage** (see ambiguity #2), bg `#262626`, border `#404040`, radius 10, px-12 py-8; check icon 16; title 14 medium white; sub 14 regular `#a3a3a3`; optional **Undo** button (px-8 py-3, radius 8, border `#404040`, label 16 medium white).
+- **Notification (Alert - Nova)** — slides in from the **top-right** of the stage (designer decision, §7.2), bg `#262626`, border `#404040`, radius 10, px-12 py-8; check icon 16; title 14 medium white; sub 14 regular `#a3a3a3`; optional **Undo** button (px-8 py-3, radius 8, border `#404040`, label 16 medium white).
 - **WhatHappenedSheet** — centered dialog at (315,161), w 469, bg `#262626`, border `#404040`, radius 14, over full-screen black/60 mask. Title 18 medium white + sub 14 `#a3a3a3`; 3 option tiles 437 wide (≈64 tall): p-8, radius 10, gap-12, icon tile 48 (`#171717`) with 24px lucide icon; tile titles 18 medium / subs 14 `#a3a3a3`; focused/pressed tile bg `alpha/black/switch/alpha-333`.
 - **EmptyState** — centered in panel: icon tile 48 (bg `#f5f5f5`, radius 10, 24px icon), title 22 heading-3, sub 14 centered muted. Variants on the components sheet: "Pick an order on the KDS", "No orders right now", "Failed to get an order", "Tickets here" (paper-ticket — out of scope), plus skeleton card.
 - **CTA cluster** — top-right of stage: container bg black/40, radius 10, shadow; 3 × icon button 44×44 (radius 10, 12px pad, transparent-white bg, 20px icons: `focus`, `flag`, `settings`). Non-functional.
@@ -223,13 +223,15 @@ Provided (renamed by actual content; all items are **1×** — they match Figma'
 
 ## 7. Ambiguities / questions (batched)
 
-1. **Touch target sizes**: brief §3.6 says 88px primary / 64px secondary "from Figma", but Figma measures 44px (CTA, rows) and 64px (sheet tiles). Which numbers govern? Proposal: build exactly to Figma.
-2. **StatusToast position**: brief §4 says top-right of stage; Figma places it top-left (x=+2 from stage left). Proposal: follow Figma.
-3. **Pending-swap detection frame color**: brief says amber "per Figma", but the Figma frame around the placed Mac & Cheese is neutral dark dashed `#404040` (the amber appears only on the toast). Proposal: follow Figma (neutral frame + amber toast).
+Decisions received so far are marked ✅ RESOLVED.
+
+1. ✅ **Touch target sizes** — RESOLVED: build to Figma's measured 44px (CTA, rows) / 64px (sheet tiles).
+2. ✅ **StatusToast position** — RESOLVED: "StatusToast" here = the notification bar (`Alert - Nova`: "Checked by you · Undo", "Notified your manager", "Swapped"). Per designer: it is a notification that **slides in from the top-right** of the stage. The top-left placement seen in some frames is superseded. Component renamed **Notification** in the inventory.
+3. ✅ **Swap colors** — RESOLVED (designer corrected the Figma): everything about a pending swap is **neutral gray**, not amber — the dashed detection frame (`#404040`, as drawn) AND the swap ActionToasts ("Put the swap down" / "Put the swap on the mat": neutral icon tile + neutral title, not orange-300). Amber remains only for multi-quantity partial counts (flow 04). The orange-300 on the swap toasts in Figma is a known mistake; do not copy it.
 4. **Dark theme for stage overlays**: all toasts/sheet render dark (#262626/#404040/#a3a3a3) in Figma renders, though a few instances resolve variables to light fallbacks via the API. Proposal: dark for everything floating over the stage.
 5. **Literal whitespace**: several strings carry trailing/leading/double spaces (`Swap␣`, `Remove 2 items␣`, `␣Apple Pie`, `→␣␣`). Copy-verbatim rule says reproduce — I will reproduce them unless you prefer trimming.
 6. **Assets**: provided item images are 1× (sharp at scale ≤1; slightly soft when the kiosk scales up on a large screen). Want @2x exports? Also confirm `classic-sandwich.png` mapping (your file 5 matched Classic's 71×66, not Honey Chicken's 81×55).
-7. **Flow 01 completion frame** in Figma reuses the full completion component (its Checked list shows Sold out / swap / Checked-by-you rows). For the Happy Path demo step the list should be 8 plain checked rows — confirm.
+7. ✅ **Per-flow Checked list contents** — RESOLVED: each flow's frames already show exactly which rows/treatments apply to that flow (sold-out flow shows only the sold-out row, swap flow only the swap treatment, etc.). Build each flow's states from that flow's own frames; the all-annotations completion card is the component sheet showing every case, and Flow 01's completion is 8 plain checked rows.
 8. **Flow 03 step 1** ("trained but unrecognised"): Figma shows the bottle with no frame and no panel change — matches the brief; `DWELL_PROMPT_MS` will be built behind a flag, default 0 (off).
 9. **Deployment** (already discussed in chat): staying on the existing Cloudflare Workers static-export setup (Data Console, access policy "Internal all"); Vercel + `middleware.ts` DEMO_KEY gate from brief §8 is skipped because middleware breaks `output: 'export'`. Flagging per the working agreement.
 10. **Numbering mismatch** between Figma sections and the brief (Figma "03 Item Split" = brief flow 04; Figma "04 can't recognize items" = brief flow 03). Code and demo UI follow the brief.
