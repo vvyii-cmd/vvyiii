@@ -33,7 +33,12 @@ export function DetectionFrame({ model }: { model: DetectionFrameModel }) {
       />
       {model.label ? (
         <div
-          className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1 rounded-full bg-black px-2 py-[2px]"
+          className={cn(
+            "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1 rounded-full px-2 py-[2px]",
+            // The pending-swap pill uses the dark secondary (#404040), the
+            // red/amber count pills sit on black — both per the Figma frames.
+            model.variant === "neutral" ? "bg-kiosk-border" : "bg-black",
+          )}
           style={{ left: rect.x + rect.w / 2, top: rect.y }}
         >
           {model.variant === "neutral" ? (
