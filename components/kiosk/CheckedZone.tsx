@@ -53,12 +53,15 @@ export function CheckedRow({ line }: { line: LineItem }) {
 }
 
 /**
- * Resolved lines pin to the bottom of the panel; the last checked item ranks
- * first. The list is height-capped and scrolls internally.
+ * Resolved lines pin to the bottom of the panel. While packing, only the most
+ * recently checked item shows (one row even when several check at once); the
+ * rest collapse into a "..." row. The zone is fixed — the full list only
+ * appears (and scrolls) in the completion state.
  */
 export function CheckedZone({ lines }: { lines: LineItem[] }) {
   if (lines.length === 0) return null;
   const count = lines.reduce((n, l) => n + l.qty, 0);
+  const latest = lines[0];
   return (
     <div className="flex w-full flex-col gap-[2px] border-t border-dashed border-border bg-kiosk-green-surface px-3 pt-2 pb-2 shadow-[0_-4px_6px_-4px_rgba(0,0,0,0.1),0_-10px_15px_-3px_rgba(0,0,0,0.1)]">
       <div className="flex w-full items-center gap-1">
@@ -67,11 +70,10 @@ export function CheckedZone({ lines }: { lines: LineItem[] }) {
           Checked ({count})
         </p>
       </div>
-      <div className="flex max-h-[66px] w-full flex-col gap-[2px] overflow-y-auto">
-        {lines.map((l) => (
-          <CheckedRow key={l.id} line={l} />
-        ))}
-      </div>
+      <CheckedRow line={latest} />
+      {lines.length > 1 ? (
+        <p className="pl-5 text-sm leading-5 text-muted-foreground">...</p>
+      ) : null}
     </div>
   );
 }

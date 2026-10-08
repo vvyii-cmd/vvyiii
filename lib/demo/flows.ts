@@ -26,8 +26,8 @@ export type Flow = {
 const SLOTS = {
   // The sandwich export carries transparent padding (drips), so the slot is
   // larger than the Figma 81×55 box to keep the visible sandwich the same size.
-  honeyChicken1: { x: 384, y: 147, w: 104, h: 87, rotation: 9.1 } as Slot,
-  honeyChicken2: { x: 469, y: 157, w: 104, h: 87 } as Slot,
+  honeyChicken1: { x: 369, y: 160, w: 112, h: 94, rotation: 9.1 } as Slot,
+  honeyChicken2: { x: 454, y: 170, w: 112, h: 94 } as Slot,
   classic: { x: 561, y: 94, w: 71, h: 66 } as Slot,
   wings: { x: 626, y: 158, w: 122, h: 98 } as Slot,
   fries: { x: 538, y: 240, w: 74, h: 95 } as Slot,

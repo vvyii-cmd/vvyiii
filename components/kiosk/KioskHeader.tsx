@@ -19,8 +19,17 @@ export function KioskHeader() {
   }, []);
 
   return (
-    <div className="relative flex w-full items-center justify-between bg-black px-4 py-2">
-      <div className="flex items-center gap-2">
+    <div className="relative flex w-full items-center justify-between px-4 py-2">
+      {/* Subtle perspective gradient straight from the Figma status bar. */}
+      <Image
+        src="/assets/stage/status-bar-bg.png"
+        alt=""
+        fill
+        priority
+        sizes="800px"
+        className="pointer-events-none object-cover"
+      />
+      <div className="relative flex items-center gap-2">
         <Image
           src="/assets/icons/otter-verify-logo.svg"
           alt=""
@@ -31,7 +40,7 @@ export function KioskHeader() {
           Otter Verify
         </p>
       </div>
-      <div className="flex items-center gap-4 text-xs leading-4 font-medium text-[#f5f5f5]">
+      <div className="relative flex items-center gap-4 text-xs leading-4 font-medium text-[#f5f5f5]">
         <p>EN</p>
         <p className="min-w-[42px] text-right" suppressHydrationWarning>
           {time ?? ""}

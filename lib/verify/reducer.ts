@@ -250,7 +250,7 @@ export function reduce(
       return { state: { ...state, lines, mat }, outbound: none };
     }
 
-    case "TAP_ROW": {
+    case "LONG_PRESS_ROW": {
       if (state.phase !== "packing") return { state, outbound: none };
       const line = state.lines.find((l) => l.id === event.lineId);
       if (!line || (line.status !== "pending" && line.status !== "partial"))

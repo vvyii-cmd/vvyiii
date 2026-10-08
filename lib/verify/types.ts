@@ -112,7 +112,7 @@ export type WorldEvent =
 
 /** Screen events: what a packer does with a finger on the kiosk. */
 export type ScreenEvent =
-  | { type: "TAP_ROW"; lineId: string }
+  | { type: "LONG_PRESS_ROW"; lineId: string }
   | { type: "DISMISS_SHEET" }
   | { type: "CHOOSE"; option: "camera_missed" | "sold_out" | "swap" }
   | { type: "UNDO" };

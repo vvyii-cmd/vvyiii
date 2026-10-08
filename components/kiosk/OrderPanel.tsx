@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { BookCopy } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import type { LineItem, Order, ScreenEvent } from "@/lib/verify/types";
@@ -119,22 +118,12 @@ export function OrderPanel({
     >
       <div className="flex w-full items-center justify-between bg-gradient-to-b from-black/10 to-transparent px-3 pt-2 pb-3">
         <div className="flex flex-col items-start">
+          {/* KDS-integrated build: order selection lives on the KDS, so no
+              multi-order button/badge here (Figma node 124:3736). */}
           <div className="flex items-center gap-2 py-1">
-            <p className="max-w-[116px] truncate text-[22px] leading-[26.4px] font-medium tracking-[-0.5px] text-foreground">
+            <p className="max-w-[160px] truncate text-[22px] leading-[26.4px] font-medium tracking-[-0.5px] text-foreground">
               {order.customer}
             </p>
-            <div className="relative flex items-start">
-              <button
-                type="button"
-                aria-label="More"
-                className="flex min-h-7 min-w-7 items-center justify-center rounded-[8px] bg-secondary p-1.5"
-              >
-                <BookCopy className="size-4 text-foreground" />
-              </button>
-              <span className="absolute -top-1.5 left-[18px] flex size-4 items-center justify-center rounded-full bg-[#2563eb] text-[8px] leading-none font-semibold text-white">
-                6
-              </span>
-            </div>
           </div>
           <div className="flex items-start gap-1">
             <Badge className="rounded-full bg-primary px-2 py-[2px] text-xs leading-4 font-semibold text-primary-foreground">
@@ -192,9 +181,9 @@ export function OrderPanel({
                   <ItemRow
                     line={l}
                     visual={stage ? "struck" : "normal"}
-                    onTap={
+                    onHold={
                       !stage && (l.status === "pending" || l.status === "partial")
-                        ? () => dispatch({ type: "TAP_ROW", lineId: l.id })
+                        ? () => dispatch({ type: "LONG_PRESS_ROW", lineId: l.id })
                         : undefined
                     }
                   />

@@ -156,7 +156,7 @@ describe("flow 03 — camera can't read", () => {
     const { state, outbound } = run([
       ...upToSeven,
       { type: "PLACE_UNRECOGNIZED", itemName: "Dt Coke", placements: place(1) },
-      { type: "TAP_ROW", lineId: "coke" },
+      { type: "LONG_PRESS_ROW", lineId: "coke" },
       { type: "CHOOSE", option: "camera_missed" },
     ]);
     expect(state.phase).toBe("complete");
@@ -173,7 +173,7 @@ describe("flow 03 — camera can't read", () => {
     const base = run([
       ...upToSeven,
       { type: "PLACE_UNRECOGNIZED", itemName: "Dt Coke", placements: place(1) },
-      { type: "TAP_ROW", lineId: "coke" },
+      { type: "LONG_PRESS_ROW", lineId: "coke" },
       { type: "CHOOSE", option: "camera_missed" },
     ]);
     const { state, outbound } = run([{ type: "UNDO" }], base.state);
@@ -256,7 +256,7 @@ describe("flow 05 — sold out and swap", () => {
   it("sold out resolves the line and notifies the manager", () => {
     const { state, outbound } = run([
       ...midway,
-      { type: "TAP_ROW", lineId: "fries" },
+      { type: "LONG_PRESS_ROW", lineId: "fries" },
       { type: "CHOOSE", option: "sold_out" },
     ]);
     expect(counter(state)).toEqual({ resolved: 5, total: 8 });
@@ -271,7 +271,7 @@ describe("flow 05 — sold out and swap", () => {
   it("swap: waiting → placed → recognised, with neutral treatment", () => {
     const waiting = run([
       ...midway,
-      { type: "TAP_ROW", lineId: "fries" },
+      { type: "LONG_PRESS_ROW", lineId: "fries" },
       { type: "CHOOSE", option: "swap" },
     ]);
     expect(activeToast(waiting.state)?.kind).toBe("swap_waiting");
