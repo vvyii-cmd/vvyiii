@@ -4,10 +4,30 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Kiosk design tokens, read from the Figma "Otter verify (Master)" variables
+ * (see docs/DESIGN_NOTES.md §1). The light shadcn palette below already matches
+ * Figma's light-surface values; these cover the dark stage overlays and the
+ * semantic accents, which have no shadcn equivalent.
+ */
+@theme {
+  /* dark surfaces floating over the camera stage (toasts, sheet, CTA) */
+  --color-kiosk-card: #262626; /* general/card (dark) */
+  --color-kiosk-border: #404040; /* general/border (dark) */
+  --color-kiosk-muted-foreground: #a3a3a3; /* general/muted foreground (dark) */
+  --color-kiosk-muted: #171717; /* general/muted (dark) */
+  /* semantic accents */
+  --color-kiosk-red: #f87171; /* tw-raw/red/400 — wrong/extra on stage */
+  --color-kiosk-amber: #fdba74; /* tw-raw/orange/300 — multi-qty partial only */
+  --color-kiosk-green: #15803d; /* tw-raw/green/700 — whole-order completion */
+  --color-kiosk-green-outline: #86efac; /* green/300 — completion stage outline */
+  --color-kiosk-green-surface: #f0fdf4; /* green/50 — checked zone bg */
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

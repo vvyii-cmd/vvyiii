@@ -1,101 +1,89 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import * as React from "react";
+import { FlowSelector } from "@/components/demo/FlowSelector";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+  OperatorConsole,
+  type OutboundLogEntry,
+} from "@/components/demo/OperatorConsole";
+import { KioskFrame } from "@/components/kiosk/KioskFrame";
+import { VerifyScreen } from "@/components/kiosk/VerifyScreen";
+import { FLOW_01, type Flow } from "@/lib/demo/flows";
+import { formatKioskTime } from "@/lib/verify/format";
+import { createKdsIntegratedIngress } from "@/lib/verify/ingress";
+import { initialState, reduce } from "@/lib/verify/reducer";
+import type { ScreenEvent, SessionState, VerifyEvent } from "@/lib/verify/types";
 
-export default function Home() {
+const { ingress } = createKdsIntegratedIngress();
+
+export default function DemoPage() {
+  const [flow, setFlow] = React.useState<Flow>(FLOW_01);
+  const [history, setHistory] = React.useState<SessionState[]>([initialState]);
+  const [outbound, setOutbound] = React.useState<OutboundLogEntry[]>([]);
+  const seqRef = React.useRef(0);
+
+  const fired = history.length - 1;
+  const state = history[fired];
+
+  const apply = (base: SessionState, events: VerifyEvent[]) => {
+    const now = formatKioskTime(new Date());
+    let next = base;
+    const entries: OutboundLogEntry[] = [];
+    for (const event of events) {
+      const result = reduce(next, event, now);
+      next = result.state;
+      for (const out of result.outbound) {
+        entries.push({ seq: ++seqRef.current, at: now, event: out });
+      }
+    }
+    if (entries.length > 0) setOutbound((prev) => [...entries.reverse(), ...prev]);
+    return next;
+  };
+
+  const fireStep = () => {
+    const step = flow.steps[fired];
+    if (!step) return;
+    const next = apply(state, step.events);
+    setHistory((h) => [...h, next]);
+  };
+
+  const dispatchScreen = (event: ScreenEvent) => {
+    const next = apply(state, [event]);
+    setHistory((h) => [...h.slice(0, -1), next]);
+  };
+
+  const reset = () => {
+    setHistory([initialState]);
+    setOutbound([]);
+  };
+
+  const selectFlow = (next: Flow) => {
+    setFlow(next);
+    reset();
+  };
+
+  const prev = () => {
+    if (fired > 0) setHistory((h) => h.slice(0, -1));
+  };
+
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Otter Verify</h1>
-          <p className="text-muted-foreground mt-1">
-            Next.js + Tailwind + shadcn/ui prototype starter, ready to build on.
-          </p>
+    <main className="flex min-h-dvh flex-1 flex-col gap-6 bg-muted/40 px-6 py-6">
+      <FlowSelector activeId={flow.id} onSelect={selectFlow} />
+      <div className="flex flex-1 flex-col items-center gap-6 xl:flex-row xl:items-start xl:justify-center">
+        <div className="flex max-h-[80dvh] w-full max-w-5xl flex-1 items-start justify-center">
+          <KioskFrame>
+            <VerifyScreen state={state} ingress={ingress} dispatch={dispatchScreen} />
+          </KioskFrame>
         </div>
-        <Badge variant="secondary">prototype</Badge>
+        <OperatorConsole
+          flow={flow}
+          fired={fired}
+          onFire={fireStep}
+          onPrev={prev}
+          onReset={reset}
+          outbound={outbound}
+        />
       </div>
-
-      <Separator className="my-8" />
-
-      <Tabs defaultValue="form" className="w-full">
-        <TabsList>
-          <TabsTrigger value="form">Form example</TabsTrigger>
-          <TabsTrigger value="components">Components</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="form" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>New concept</CardTitle>
-              <CardDescription>
-                A sample form built with shadcn/ui components — edit this page
-                to start prototyping.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Give your concept a name" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="What problem does this concept solve?"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch id="public" />
-                <Label htmlFor="public">Visible to team</Label>
-              </div>
-            </CardContent>
-            <CardFooter className="gap-2">
-              <Button>Create</Button>
-              <Button variant="outline">Cancel</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="components" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Installed components</CardTitle>
-              <CardDescription>
-                More live in components/ui/ (dialog, dropdown-menu, select,
-                tooltip, …) — add others with npx shadcn add.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap items-center gap-3">
-              <Button size="sm">Button</Button>
-              <Button size="sm" variant="secondary">
-                Secondary
-              </Button>
-              <Button size="sm" variant="destructive">
-                Destructive
-              </Button>
-              <Badge>Badge</Badge>
-              <Badge variant="outline">Outline</Badge>
-              <Avatar>
-                <AvatarFallback>VW</AvatarFallback>
-              </Avatar>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </main>
   );
 }
