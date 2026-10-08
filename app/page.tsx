@@ -251,32 +251,30 @@ export default function DemoPage() {
   }, [fireNext, prev, reset, selectFlow]);
 
   return (
-    <main className="flex min-h-dvh flex-1 flex-col gap-6 bg-muted/40 px-6 py-6">
+    <main className="flex h-dvh flex-col items-center gap-4 bg-muted/40 px-6 py-4">
       <FlowSelector activeId={flow.id} onSelect={selectFlow} />
-      <div className="flex flex-1 flex-col items-center gap-6 xl:flex-row xl:items-start xl:justify-center">
-        <div className="flex max-h-[80dvh] w-full max-w-5xl flex-1 items-start justify-center">
-          <KioskFrame>
-            <VerifyScreen
-              state={current.state}
-              ingress={ingress}
-              dispatch={dispatchScreen}
-            />
-          </KioskFrame>
-        </div>
-        <OperatorConsole
-          flow={flow}
-          steps={steps}
-          currentIndex={current.step}
-          branchId={current.branchId}
-          atBranchPoint={atBranchPoint}
-          busy={busy}
-          onSelectBranch={selectBranch}
-          onFire={fireNext}
-          onPrev={prev}
-          onReset={reset}
-          outbound={outbound}
-        />
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+        <KioskFrame>
+          <VerifyScreen
+            state={current.state}
+            ingress={ingress}
+            dispatch={dispatchScreen}
+          />
+        </KioskFrame>
       </div>
+      <OperatorConsole
+        flow={flow}
+        steps={steps}
+        currentIndex={current.step}
+        branchId={current.branchId}
+        atBranchPoint={atBranchPoint}
+        busy={busy}
+        onSelectBranch={selectBranch}
+        onFire={fireNext}
+        onPrev={prev}
+        onReset={reset}
+        outbound={outbound}
+      />
     </main>
   );
 }
