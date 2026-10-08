@@ -17,7 +17,8 @@ const LABEL_TEXT: Record<DetectionFrameModel["variant"], string> = {
 /**
  * Dashed detection frame on the stage — rendered only when the packer must
  * act. Red = wrong/extra, amber = partial multi-quantity count, neutral =
- * pending swap. The label pill overlaps the frame's top-left corner.
+ * pending swap. The dark label pill sits centered on the frame's top stroke
+ * (everything floating over the stage is dark mode).
  */
 export function DetectionFrame({ model }: { model: DetectionFrameModel }) {
   const { rect } = model;
@@ -32,11 +33,8 @@ export function DetectionFrame({ model }: { model: DetectionFrameModel }) {
       />
       {model.label ? (
         <div
-          className={cn(
-            "absolute flex items-center justify-center gap-1 rounded-full px-2 py-[2px]",
-            model.labelTone === "light" ? "bg-white" : "bg-black",
-          )}
-          style={{ left: rect.x + 18, top: rect.y - 9 }}
+          className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1 rounded-full bg-black px-2 py-[2px]"
+          style={{ left: rect.x + rect.w / 2, top: rect.y }}
         >
           {model.variant === "neutral" ? (
             <Repeat className="size-3 text-white" />

@@ -242,6 +242,12 @@ Decisions received so far are marked ✅ RESOLVED.
 
 ## 8. Behaviour rules settled during Phases 2–3
 
+**Global surface rule (designer):** everything except the white order panel on
+the left is DARK MODE — detection-frame label pills, toast count pills, the
+Undo button, notifications, sheets, all of it. No light fills float over the
+stage. Detection-frame label pills are always black, colored text, and sit
+**horizontally centered on the frame's top stroke**.
+
 - **Notifications** (Alert - Nova): persist until the next world activity — any
   PLACE or REMOVE clears them (matches the Figma frames: the sold-out/swap
   notification is gone by the completion screen; flow 03's "Checked by you"

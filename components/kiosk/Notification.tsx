@@ -54,7 +54,7 @@ export function Notification({
         <button
           type="button"
           onClick={() => dispatch({ type: "UNDO" })}
-          className="flex shrink-0 items-center justify-center rounded-[8px] border border-kiosk-border bg-white/30 px-2 py-[3px]"
+          className="flex shrink-0 items-center justify-center rounded-[8px] border border-kiosk-border bg-black/30 px-2 py-[3px]"
         >
           <span className="text-[16px] leading-6 font-medium text-white">Undo</span>
         </button>

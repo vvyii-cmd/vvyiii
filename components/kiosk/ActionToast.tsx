@@ -93,12 +93,7 @@ export function ActionToast({ toast }: { toast: ToastModel }) {
             ) : null}
           </div>
           {pill ? (
-            <div
-              className={cn(
-                "flex shrink-0 items-center justify-center rounded-full px-2 py-[2px]",
-                pill.tone === "amber" ? "bg-kiosk-border" : "bg-white",
-              )}
-            >
+            <div className="flex shrink-0 items-center justify-center rounded-full bg-black px-2 py-[2px]">
               <p
                 className={cn(
                   "text-xs leading-4 font-semibold whitespace-nowrap",
