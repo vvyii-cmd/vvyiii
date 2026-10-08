@@ -90,11 +90,14 @@ export function OrderPanel({
   );
 
   const resolved = checkedLines(lines);
-  const leavingQty = lines
-    .filter((l) => leaving.has(l.id))
+  // Animation order: while a line is striking in place nothing else changes;
+  // the moment it starts sliding out ("collapse"), it surfaces as the first
+  // item in the Checked zone and both counters tick — at the same time.
+  const strikingQty = lines
+    .filter((l) => leaving.get(l.id) === "strike")
     .reduce((n, l) => n + l.qty, 0);
   const shownResolved =
-    resolved.reduce((n, l) => n + l.qty, 0) - leavingQty;
+    resolved.reduce((n, l) => n + l.qty, 0) - strikingQty;
   const total = lines.reduce((n, l) => n + l.qty, 0);
 
   // Rows kept in the open list: unresolved lines plus lines mid-animation,
@@ -105,7 +108,7 @@ export function OrderPanel({
       l.status === "partial" ||
       leaving.has(l.id),
   );
-  const checkedRows = resolved.filter((l) => !leaving.has(l.id));
+  const checkedRows = resolved.filter((l) => leaving.get(l.id) !== "strike");
 
   const showComplete = phase === "complete" && leaving.size === 0;
 
