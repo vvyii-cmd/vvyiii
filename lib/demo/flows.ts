@@ -24,6 +24,12 @@ export type Flow = {
   id: "01" | "02" | "03" | "04" | "05";
   title: string;
   description: string;
+  /**
+   * Scene-setting events applied instantly (no beats, no log) when the flow
+   * is selected or reset: flows that start mid-order open there directly
+   * instead of making the presenter click through the setup.
+   */
+  setup?: VerifyEvent[];
   steps: FlowStep[];
   /** Offered once the trunk steps are exhausted. */
   branches?: FlowBranch[];
@@ -168,13 +174,8 @@ export const FLOW_02: Flow = {
   id: "02",
   title: "02 Items not on the ticket",
   description: "Wrong items get red frames and a remove toast; counter never moves.",
+  setup: MID_ORDER_SETUP,
   steps: [
-    {
-      label: "Load mid-order state (4/8 packed)",
-      expect:
-        "Counter 4/8; Checked (4); open: Cajun Fries Reg, 2× Biscuit, Dt Coke. Sandwiches and wings on the stage.",
-      events: MID_ORDER_SETUP,
-    },
     {
       label: "Place Apple Pie (not on ticket)",
       expect:
@@ -245,12 +246,8 @@ export const FLOW_03: Flow = {
   title: "03 Camera can't read",
   description:
     "A trained item the camera can't recognise: the packer confirms it by hand.",
+  setup: FLOW_03_SETUP,
   steps: [
-    {
-      label: "Load 7/8 state",
-      expect: "Counter 7/8; open: x1 Dt Coke; Checked (7). Stage shows the other items.",
-      events: FLOW_03_SETUP,
-    },
     {
       label: "Place Dt Coke — camera can't recognise it",
       expect:
@@ -296,22 +293,17 @@ export const FLOW_04: Flow = {
   id: "04",
   title: "04 Item Split",
   description: "A multi-quantity line placed in parts: amber until all are down.",
+  setup: [
+    { type: "KDS_PACK_NOW", order: EF541_SPLIT },
+    placeHoneyChicken,
+    placeClassic,
+    placeWings,
+  ],
   steps: [
-    {
-      label: "Load mid-order state (4/9 packed)",
-      expect:
-        "Counter 4/9; open: Cajun Fries Reg, 3× Biscuit, Dt Coke; Checked (4).",
-      events: [
-        { type: "KDS_PACK_NOW", order: EF541_SPLIT },
-        placeHoneyChicken,
-        placeClassic,
-        placeWings,
-      ],
-    },
     {
       label: "Place 1 Biscuit",
       expect:
-        'Amber dashed frame "1 of 3 • Biscuit"; amber toast "Put all 3 Biscuits down together" with badge 1 of 3. Counter unchanged.',
+        'After the split lingers ~1.5s: amber dashed frame "1 of 3 • Biscuit"; amber toast "Put all 3 Biscuits down together" with badge 1 of 3. Counter unchanged.',
       events: [
         {
           type: "PLACE",
@@ -404,13 +396,8 @@ export const FLOW_05: Flow = {
   id: "05",
   title: "05 Items out of stock",
   description: "An open line that can't be packed: mark it sold out, or swap it.",
+  setup: MID_ORDER_SETUP,
   steps: [
-    {
-      label: "Load mid-order state (4/8 packed)",
-      expect:
-        "Counter 4/8; open: Cajun Fries Reg, 2× Biscuit, Dt Coke; Checked (4).",
-      events: MID_ORDER_SETUP,
-    },
     {
       label: "Long-press the Cajun Fries Reg row",
       kind: "screen",

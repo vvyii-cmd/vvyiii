@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { DWELL_PROMPT_MS } from "@/lib/verify/config";
+import { DWELL_PROMPT_MS, PARTIAL_PROMPT_DWELL_MS } from "@/lib/verify/config";
 import type { OrderIngress } from "@/lib/verify/ingress";
 import type { ScreenEvent, SessionState } from "@/lib/verify/types";
 import {
@@ -40,8 +40,37 @@ export function VerifyScreen({
   const liveObjects = React.useMemo(() => matObjects(state), [state]);
   const liveFrames = React.useMemo(() => detectionFrames(state), [state]);
   const toast = React.useMemo(() => activeToast(state), [state]);
-  const objects = useListPresence(liveObjects, (o) => o.id, 200);
-  const frames = useListPresence(liveFrames, (f) => f.key, 180);
+
+  // The amber split guidance only appears once the partial state has lingered
+  // (PARTIAL_PROMPT_DWELL_MS): a packer placing a multi-quantity line in quick
+  // succession never sees it flash. Each new placement restarts the dwell.
+  const partialSig = React.useMemo(() => {
+    if (state.phase !== "packing") return "";
+    return state.lines
+      .filter((l) => l.status === "partial" && l.onMat < l.qty)
+      .map((l) => `${l.id}:${l.onMat}`)
+      .join(",");
+  }, [state]);
+  const [dwelledSig, setDwelledSig] = React.useState("");
+  React.useEffect(() => {
+    if (!partialSig) return;
+    const id = setTimeout(() => setDwelledSig(partialSig), PARTIAL_PROMPT_DWELL_MS);
+    return () => clearTimeout(id);
+  }, [partialSig]);
+  const partialLingers = partialSig !== "" && dwelledSig === partialSig;
+
+  const shownFrames = React.useMemo(
+    () =>
+      partialLingers
+        ? liveFrames
+        : liveFrames.filter((f) => f.variant !== "amber"),
+    [liveFrames, partialLingers],
+  );
+  const shownToast =
+    toast?.kind === "put_all" && !partialLingers ? undefined : toast;
+
+  const objects = useListPresence(liveObjects, (o) => o.id, 280);
+  const frames = useListPresence(shownFrames, (f) => f.key, 280);
   const notification = state.phase === "idle" ? undefined : state.notification;
   const sheetLine = React.useMemo(
     () =>
@@ -129,7 +158,7 @@ export function VerifyScreen({
           )}
         </Crossfade>
         <CameraStage complete={state.phase === "complete"}>
-          <ActionToast toast={toast} />
+          <ActionToast toast={shownToast} />
           <Notification notification={notification} dispatch={dispatch} />
         </CameraStage>
       </div>

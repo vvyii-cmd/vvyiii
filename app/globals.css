@@ -217,46 +217,49 @@
 }
 
 .kiosk-enter-fade {
-  animation: kiosk-fade-in 220ms var(--kiosk-ease) both;
+  animation: kiosk-fade-in 350ms var(--kiosk-ease) both;
 }
 .kiosk-exit-fade {
-  animation: kiosk-fade-out 180ms ease-in forwards;
+  animation: kiosk-fade-out 280ms ease-in forwards;
 }
 .kiosk-enter-tick {
-  animation: kiosk-tick-in 240ms var(--kiosk-ease) both;
+  animation: kiosk-tick-in 350ms var(--kiosk-ease) both;
 }
 .kiosk-enter-rise {
-  animation: kiosk-rise-in 280ms var(--kiosk-ease) both;
+  animation: kiosk-rise-in 400ms var(--kiosk-ease) both;
 }
 .kiosk-enter-land {
-  animation: kiosk-land-in 250ms var(--kiosk-ease) both;
+  animation: kiosk-land-in 350ms var(--kiosk-ease) both;
 }
 .kiosk-enter-frame {
-  animation: kiosk-frame-in 220ms var(--kiosk-ease) both;
+  /* The camera only recognises an item after it has landed: hold the frame
+     and its label back for the land animation plus a recognition beat. */
+  animation: kiosk-frame-in 350ms var(--kiosk-ease) 450ms both;
 }
 .kiosk-enter-toast {
-  animation: kiosk-toast-in 300ms var(--kiosk-ease) both;
+  animation: kiosk-toast-in 550ms var(--kiosk-ease) both;
 }
 .kiosk-exit-toast {
-  animation: kiosk-toast-out 200ms ease-in forwards;
+  animation: kiosk-toast-out 320ms ease-in forwards;
 }
 .kiosk-enter-note {
-  animation: kiosk-note-in 300ms var(--kiosk-ease) both;
+  animation: kiosk-note-in 500ms var(--kiosk-ease) both;
 }
 .kiosk-exit-note {
-  animation: kiosk-note-out 200ms ease-in forwards;
+  animation: kiosk-note-out 320ms ease-in forwards;
 }
 .kiosk-enter-sheet {
-  animation: kiosk-sheet-in 260ms var(--kiosk-ease) both;
+  animation: kiosk-sheet-in 380ms var(--kiosk-ease) both;
 }
 .kiosk-exit-sheet {
-  animation: kiosk-sheet-out 180ms ease-in forwards;
+  animation: kiosk-sheet-out 280ms ease-in forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [class*="kiosk-enter-"],
   [class*="kiosk-exit-"] {
     animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
   }
 }
 

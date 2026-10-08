@@ -271,6 +271,11 @@ export function reduce(
       return { state: { ...state, activeSheetLineId: undefined }, outbound: none };
     }
 
+    case "DISMISS_NOTIFICATION": {
+      if (!state.notification) return { state, outbound: none };
+      return { state: { ...state, notification: undefined }, outbound: none };
+    }
+
     case "CHOOSE": {
       if (state.phase !== "packing" || !state.activeSheetLineId)
         return { state, outbound: none };

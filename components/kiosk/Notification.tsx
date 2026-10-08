@@ -1,7 +1,9 @@
 "use client";
 
 import { Check } from "lucide-react";
+import * as React from "react";
 import { cn } from "cn";
+import { NOTIFICATION_DISMISS_MS } from "@/lib/verify/config";
 import type { Notification as NotificationModel, ScreenEvent } from "@/lib/verify/types";
 import { usePresence } from "./motion";
 
@@ -23,7 +25,8 @@ function copy(n: NotificationModel): { title: string; subtitle: string } {
 }
 
 /**
- * Status notification: slides in from the right edge of the stage and slides
+ * Status notification: a toast, not a banner. Slides in from the right edge
+ * of the stage, dismisses itself after NOTIFICATION_DISMISS_MS, and slides
  * back out when superseded. Carries an Undo button while a human-confirmed
  * check can still be reverted.
  */
@@ -34,7 +37,22 @@ export function Notification({
   notification: NotificationModel | undefined;
   dispatch: (e: ScreenEvent) => void;
 }) {
-  const { item, exiting } = usePresence(notification, 200);
+  const { item, exiting } = usePresence(notification, 320);
+
+  // Auto-dismiss, re-armed when a different notification takes over. The
+  // dispatch ref keeps parent re-renders from resetting the countdown.
+  const dispatchRef = React.useRef(dispatch);
+  React.useEffect(() => {
+    dispatchRef.current = dispatch;
+  }, [dispatch]);
+  React.useEffect(() => {
+    if (!notification) return;
+    const id = setTimeout(
+      () => dispatchRef.current({ type: "DISMISS_NOTIFICATION" }),
+      NOTIFICATION_DISMISS_MS,
+    );
+    return () => clearTimeout(id);
+  }, [notification]);
   if (!item) return null;
   const key = `${item.kind}:${"itemName" in item ? item.itemName : ""}`;
   const { title, subtitle } = copy(item);

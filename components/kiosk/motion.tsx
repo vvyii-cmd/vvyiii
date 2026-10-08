@@ -4,12 +4,12 @@ import * as React from "react";
 import { cn } from "cn";
 
 /**
- * Kiosk motion system. One easing, two speeds: entrances settle (~280ms,
- * ease-out), exits get out of the way (~180ms, ease-in). The keyframes and
- * .kiosk-* utility classes live in globals.css.
+ * Kiosk motion system. One easing, two speeds: entrances glide in and settle
+ * (~350–550ms, ease-out), exits get out of the way (~280–320ms, ease-in).
+ * The keyframes and .kiosk-* utility classes live in globals.css.
  */
-export const ENTER_MS = 280;
-export const EXIT_MS = 180;
+export const ENTER_MS = 400;
+export const EXIT_MS = 280;
 
 /**
  * Keep rendering a value briefly after it goes away so it can animate out.

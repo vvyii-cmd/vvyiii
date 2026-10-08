@@ -248,10 +248,11 @@ Undo button, notifications, sheets, all of it. No light fills float over the
 stage. Detection-frame label pills are always black, colored text, and sit
 **horizontally centered on the frame's top stroke**.
 
-- **Notifications** (Alert - Nova): persist until the next world activity — any
-  PLACE or REMOVE clears them (matches the Figma frames: the sold-out/swap
-  notification is gone by the completion screen; flow 03's "Checked by you"
-  stays because nothing is placed afterwards).
+- **Notifications** (Alert - Nova): behave like toasts, not banners — they
+  auto-dismiss after 5s (`NOTIFICATION_DISMISS_MS`, via the
+  `DISMISS_NOTIFICATION` screen event) and are also cleared by the next world
+  activity (any PLACE or REMOVE), matching the Figma frames where the
+  sold-out/swap notification is gone by the completion screen.
 - **Swap**: while waiting, the open line renders normally; once the
   replacement lands on the mat the line strikes through in place and the
   pending-swap frame carries a dark "⇄ 1x Mac & Cheese" pill. All swap
@@ -266,20 +267,32 @@ stage. Detection-frame label pills are always black, colored text, and sit
   completion immediately. Per ground rules the brief wins — the build shows
   completion with the Undo notification on top.
 - **Motion system**: one easing (`cubic-bezier(0.22,1,0.36,1)`), entrances
-  settle (~250–300ms), exits get out of the way (~180–200ms). Action toasts
-  slide up from the bottom edge and slide back out; content changes crossfade
-  without re-sliding the card. Notifications slide in and out on the right.
-  Mat objects land with a small settle and fade off; detection frames fade in
-  and morph smoothly as their contents change. The sheet floats up over a
-  fading mask. Panel states crossfade (empty ↔ order ↔ completion), counters
-  tick in with a rise, completion colors transition. `prefers-reduced-motion`
-  collapses all of it.
+  glide in and settle (~350–550ms), exits get out of the way (~280–320ms).
+  Action toasts slide up slowly from the bottom edge and slide back out;
+  content changes crossfade without re-sliding the card. Notifications slide
+  in and out on the right. Mat objects land with a small settle and fade off.
+  Detection frames and their label pills appear only ~450ms AFTER the object
+  lands (the camera recognises an item after it is placed, never before) and
+  morph smoothly as their contents change. The sheet floats up over a fading
+  mask. Panel check-off is deliberately unhurried: strike in place ~500ms,
+  then a ~450ms collapse while the counters tick and the item surfaces in
+  Checked. Panel states crossfade (empty ↔ order ↔ completion).
+  `prefers-reduced-motion` collapses all of it (durations and delays).
+- **Split guidance dwell**: the amber "Put all N down together" toast and the
+  amber count frame only appear once the partial state has lingered ~1.5s
+  (`PARTIAL_PROMPT_DWELL_MS`); each further placement restarts the dwell. A
+  packer placing a multi-quantity line in quick succession (and the demo's
+  600ms beats) never sees the amber treatment flash. Red (wrong/over) and
+  neutral (swap) treatments stay immediate.
 - **Beat sequencing (demo)**: a step that places or removes several objects
   plays one object per ~600ms beat, so the scene reads like a real packer —
   including the honest intermediate states (e.g. "1 of 2" amber while the
   second sandwich is still in hand).
-- **Demo shell** (Phase 2): URL deep links `/?flow=04&step=2&branch=extra`
-  replay the script; keyboard → next, ← prev, R reset, 1–5 switch flow;
+- **Demo shell** (Phase 2): flows 02–05 carry `setup` events and open directly
+  in their mid-order state (selecting or resetting the flow applies the setup
+  instantly — no clicking through it, nothing logged). URL deep links
+  `/?flow=04&step=2&branch=extra` replay the script on top of the setup;
+  keyboard → next, ← prev, R reset, 1–5 switch flow;
   branching steps surface as branch buttons at the branch point; kiosk-gesture
   steps show a "You do it on the kiosk" hint and also advance when the
   presenter performs the matching gesture on the kiosk itself.

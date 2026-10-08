@@ -42,7 +42,7 @@ export function WhatHappenedSheet({
   line: LineItem | undefined;
   dispatch: (e: ScreenEvent) => void;
 }) {
-  const { item, exiting } = usePresence(line, 180);
+  const { item, exiting } = usePresence(line, 280);
   if (!item) return null;
 
   return (

@@ -115,7 +115,9 @@ export type ScreenEvent =
   | { type: "LONG_PRESS_ROW"; lineId: string }
   | { type: "DISMISS_SHEET" }
   | { type: "CHOOSE"; option: "camera_missed" | "sold_out" | "swap" }
-  | { type: "UNDO" };
+  | { type: "UNDO" }
+  /** Fired by the notification's auto-dismiss timer — it is a toast, not a banner. */
+  | { type: "DISMISS_NOTIFICATION" };
 
 export type VerifyEvent = WorldEvent | ScreenEvent;
 

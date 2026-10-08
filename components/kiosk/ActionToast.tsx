@@ -78,7 +78,7 @@ function view(toast: ToastModel): ToastView {
  * crossfade without re-sliding the card.
  */
 export function ActionToast({ toast }: { toast: ToastModel | undefined }) {
-  const { item, exiting } = usePresence(toast, 200);
+  const { item, exiting } = usePresence(toast, 320);
   if (!item) return null;
   const v = view(item);
   const contentKey = `${item.kind}:${v.title}:${v.pill?.text ?? ""}`;

@@ -169,6 +169,21 @@ describe("flow 03 — camera can't read", () => {
     expect(rec.lines.find((l) => l.id === "coke")?.humanConfirmed).toBe(true);
   });
 
+  it("auto-dismissing the notification clears it without touching the line", () => {
+    const base = run([
+      ...upToSeven,
+      { type: "PLACE_UNRECOGNIZED", itemName: "Dt Coke", placements: place(1) },
+      { type: "LONG_PRESS_ROW", lineId: "coke" },
+      { type: "CHOOSE", option: "camera_missed" },
+    ]);
+    const { state, outbound } = run([{ type: "DISMISS_NOTIFICATION" }], base.state);
+    expect(state.phase).toBe("complete");
+    if (state.phase !== "complete") throw new Error();
+    expect(state.notification).toBeUndefined();
+    expect(state.lines.find((l) => l.id === "coke")?.status).toBe("checked_by_you");
+    expect(outbound).toEqual([]);
+  });
+
   it("undo while the toast shows reverts to packing", () => {
     const base = run([
       ...upToSeven,

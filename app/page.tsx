@@ -41,6 +41,15 @@ function applyEvents(base: SessionState, events: VerifyEvent[]) {
 }
 
 /**
+ * Starting history entry for a flow: flows with scene-setting `setup` events
+ * open mid-order directly — no clicking through the setup, nothing logged.
+ */
+function entryFor(flow: Flow): HistEntry {
+  if (!flow.setup) return INITIAL;
+  return { state: applyEvents(initialState, flow.setup).state, step: 0 };
+}
+
+/**
  * One beat = one physical action. A step that places or removes several
  * objects plays them one at a time, like a real packer would.
  */
@@ -160,15 +169,15 @@ export default function DemoPage() {
 
   const reset = React.useCallback(() => {
     cancelBeats();
-    setHistory([INITIAL]);
+    setHistory([entryFor(flow)]);
     setOutbound([]);
-  }, [cancelBeats]);
+  }, [cancelBeats, flow]);
 
   const selectFlow = React.useCallback(
     (next: Flow) => {
       cancelBeats();
       setFlow(next);
-      setHistory([INITIAL]);
+      setHistory([entryFor(next)]);
       setOutbound([]);
     },
     [cancelBeats],
@@ -198,8 +207,9 @@ export default function DemoPage() {
         Math.max(parseInt(params.get("step") ?? "0", 10) || 0, 0),
         script.length,
       );
-      const entries: HistEntry[] = [INITIAL];
-      let state: SessionState = initialState;
+      const start = entryFor(target);
+      const entries: HistEntry[] = [start];
+      let state: SessionState = start.state;
       for (let i = 0; i < step; i++) {
         // The branch choice happens after the trunk, before its first step.
         if (branchId && i === target.steps.length) {

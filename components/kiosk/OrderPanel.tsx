@@ -11,9 +11,9 @@ import { CheckedZone } from "./CheckedZone";
 import { CompletionState } from "./CompletionState";
 
 /** Strike-in-place hold before a satisfied line slides into the Checked zone. */
-const STRIKE_HOLD_MS = 300;
+const STRIKE_HOLD_MS = 500;
 /** Slide/collapse duration. */
-const SLIDE_MS = 250;
+const SLIDE_MS = 450;
 
 type LeavingStage = "strike" | "collapse";
 
