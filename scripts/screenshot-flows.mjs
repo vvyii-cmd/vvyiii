@@ -3,6 +3,10 @@
  * exercises the deep-link replay) for visual QA against the Figma frames.
  *
  * Usage: node scripts/screenshot-flows.mjs [baseUrl] [outDir]
+ *
+ * Local QA only — playwright is intentionally not a project dependency (the
+ * deployment platform runs npm ci): install it ad hoc with
+ *   npm i --no-save playwright
  */
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   turbopack: {
+    // The app also builds inside the company user-content monorepo, which has
+    // its own lockfiles — pin the workspace root to this directory.
+    root: __dirname,
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],

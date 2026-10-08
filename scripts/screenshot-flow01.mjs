@@ -4,6 +4,10 @@
  *
  * Usage: node scripts/screenshot-flow01.mjs [baseUrl] [outDir]
  * Default baseUrl http://localhost:8788, outDir ./qa/flow01
+ *
+ * Local QA only — playwright is intentionally not a project dependency (the
+ * deployment platform runs npm ci): install it ad hoc with
+ *   npm i --no-save playwright
  */
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
