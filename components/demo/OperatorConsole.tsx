@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, GitBranch, RotateCcw } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { Flow } from "@/lib/demo/flows";
+import type { Flow, FlowStep } from "@/lib/demo/flows";
 import type { OutboundEvent } from "@/lib/verify/types";
 
 export type OutboundLogEntry = {
@@ -22,25 +22,35 @@ export type OutboundLogEntry = {
 };
 
 /**
- * Demo-only operator console: fires the world events the camera would observe.
- * Deletable without touching anything in components/kiosk.
+ * Demo-only operator console: fires the world events the camera would observe
+ * and guides the presenter through kiosk gestures. Deletable without touching
+ * anything in components/kiosk.
  */
 export function OperatorConsole({
   flow,
-  fired,
+  steps,
+  currentIndex,
+  branchId,
+  atBranchPoint,
+  onSelectBranch,
   onFire,
   onPrev,
   onReset,
   outbound,
 }: {
   flow: Flow;
-  fired: number;
+  steps: FlowStep[];
+  currentIndex: number;
+  branchId?: string;
+  atBranchPoint: boolean;
+  onSelectBranch: (id: string) => void;
   onFire: () => void;
   onPrev: () => void;
   onReset: () => void;
   outbound: OutboundLogEntry[];
 }) {
-  const current = flow.steps[fired];
+  const current = steps[currentIndex];
+  const branch = flow.branches?.find((b) => b.id === branchId);
   return (
     <Card className="w-full max-w-sm gap-4">
       <CardHeader>
@@ -49,26 +59,35 @@ export function OperatorConsole({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onReset}>
+          <Button variant="outline" size="sm" onClick={onReset} title="R">
             <RotateCcw data-icon="inline-start" />
-            Reset flow
+            Reset
           </Button>
-          <Button variant="outline" size="sm" onClick={onPrev} disabled={fired === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrev}
+            disabled={currentIndex === 0 && !branchId}
+            title="←"
+          >
             <ArrowLeft data-icon="inline-start" />
             Prev
           </Button>
-          <Button size="sm" onClick={onFire} disabled={!current}>
+          <Button size="sm" onClick={onFire} disabled={!current} title="→">
             Next
             <ArrowRight data-icon="inline-end" />
           </Button>
+          <span className="ml-auto text-[10px] text-muted-foreground">
+            ← → · R · 1–5
+          </span>
         </div>
 
         <ol className="flex flex-col gap-1">
-          {flow.steps.map((step, i) => {
-            const isCurrent = i === fired;
-            const done = i < fired;
+          {steps.map((step, i) => {
+            const isCurrent = i === currentIndex;
+            const done = i < currentIndex;
             return (
-              <li key={i} className="flex flex-col">
+              <li key={`${i}-${step.label}`} className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
@@ -92,22 +111,47 @@ export function OperatorConsole({
                     disabled={!isCurrent}
                     onClick={onFire}
                   >
+                    {step.kind === "screen" ? "👆 " : ""}
                     {step.label}
                   </Button>
                 </div>
+                {isCurrent && step.screenHint ? (
+                  <p className="pt-0.5 pl-7 text-xs font-medium">
+                    You do it on the kiosk: {step.screenHint}
+                  </p>
+                ) : null}
                 {isCurrent && step.expect ? (
                   <p className="pt-0.5 pl-7 text-xs text-muted-foreground">
                     → {step.expect}
                   </p>
                 ) : null}
-                {isCurrent && step.screenHint ? (
-                  <p className="pt-0.5 pl-7 text-xs font-medium">
-                    👆 You tap on the kiosk: {step.screenHint}
-                  </p>
-                ) : null}
               </li>
             );
           })}
+          {atBranchPoint && flow.branches ? (
+            <li className="flex flex-col gap-1 pt-1">
+              <p className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                <GitBranch className="size-3" /> Pick a branch
+              </p>
+              <div className="flex flex-wrap gap-1.5 pl-5">
+                {flow.branches.map((b) => (
+                  <Button
+                    key={b.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectBranch(b.id)}
+                  >
+                    {b.label}
+                  </Button>
+                ))}
+              </div>
+            </li>
+          ) : null}
+          {branch ? (
+            <li className="flex items-center gap-1 pt-1 text-xs text-muted-foreground">
+              <GitBranch className="size-3" /> Branch: {branch.label}
+            </li>
+          ) : null}
         </ol>
 
         <Separator />

@@ -1,0 +1,56 @@
+import { Repeat } from "lucide-react";
+import { cn } from "cn";
+import type { DetectionFrameModel } from "@/lib/verify/selectors";
+
+const BORDER: Record<DetectionFrameModel["variant"], string> = {
+  red: "border-kiosk-red",
+  amber: "border-kiosk-amber",
+  neutral: "border-kiosk-border",
+};
+
+const LABEL_TEXT: Record<DetectionFrameModel["variant"], string> = {
+  red: "text-kiosk-red",
+  amber: "text-kiosk-amber",
+  neutral: "text-white",
+};
+
+/**
+ * Dashed detection frame on the stage — rendered only when the packer must
+ * act. Red = wrong/extra, amber = partial multi-quantity count, neutral =
+ * pending swap. The label pill overlaps the frame's top-left corner.
+ */
+export function DetectionFrame({ model }: { model: DetectionFrameModel }) {
+  const { rect } = model;
+  return (
+    <>
+      <div
+        className={cn(
+          "absolute rounded-[10px] border-3 border-dashed bg-black/15",
+          BORDER[model.variant],
+        )}
+        style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }}
+      />
+      {model.label ? (
+        <div
+          className={cn(
+            "absolute flex items-center justify-center gap-1 rounded-full px-2 py-[2px]",
+            model.labelTone === "light" ? "bg-white" : "bg-black",
+          )}
+          style={{ left: rect.x + 18, top: rect.y - 9 }}
+        >
+          {model.variant === "neutral" ? (
+            <Repeat className="size-3 text-white" />
+          ) : null}
+          <p
+            className={cn(
+              "text-xs leading-4 font-semibold whitespace-nowrap",
+              LABEL_TEXT[model.variant],
+            )}
+          >
+            {model.label}
+          </p>
+        </div>
+      ) : null}
+    </>
+  );
+}

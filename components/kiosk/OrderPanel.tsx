@@ -29,12 +29,18 @@ export function OrderPanel({
   lines,
   phase,
   recordedAt,
+  activeSheetLineId,
+  swapPendingLineId,
   dispatch,
 }: {
   order: Order;
   lines: LineItem[];
   phase: "packing" | "complete";
   recordedAt?: string;
+  /** Line whose "What happened?" sheet is open: its row stays highlighted. */
+  activeSheetLineId?: string;
+  /** Line awaiting its swap item: its row shows struck in place. */
+  swapPendingLineId?: string;
   dispatch: (e: ScreenEvent) => void;
 }) {
   const [leaving, setLeaving] = React.useState<Map<string, LeavingStage>>(
@@ -183,9 +189,17 @@ export function OrderPanel({
                 >
                   <ItemRow
                     line={l}
-                    visual={stage ? "struck" : "normal"}
+                    visual={
+                      stage || l.id === swapPendingLineId
+                        ? "struck"
+                        : l.id === activeSheetLineId
+                          ? "highlighted"
+                          : "normal"
+                    }
                     onHold={
-                      !stage && (l.status === "pending" || l.status === "partial")
+                      !stage &&
+                      l.id !== swapPendingLineId &&
+                      (l.status === "pending" || l.status === "partial")
                         ? () => dispatch({ type: "LONG_PRESS_ROW", lineId: l.id })
                         : undefined
                     }

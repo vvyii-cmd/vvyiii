@@ -237,3 +237,30 @@ Decisions received so far are marked ✅ RESOLVED.
 10. **Numbering mismatch** between Figma sections and the brief (Figma "03 Item Split" = brief flow 04; Figma "04 can't recognize items" = brief flow 03). Code and demo UI follow the brief.
 
 **Phase 0 complete — stopping here per the working agreement.** Phase 1 (scaffold + theme + Flow 01) starts after the questions above are answered and the missing assets land.
+
+---
+
+## 8. Behaviour rules settled during Phases 2–3
+
+- **Notifications** (Alert - Nova): persist until the next world activity — any
+  PLACE or REMOVE clears them (matches the Figma frames: the sold-out/swap
+  notification is gone by the completion screen; flow 03's "Checked by you"
+  stays because nothing is placed afterwards).
+- **Swap**: while waiting, the open line renders normally; once the
+  replacement lands on the mat the line strikes through in place and the
+  pending-swap frame carries a dark "⇄ 1x Mac & Cheese" pill. All swap
+  treatment is neutral gray (§7.3).
+- **Figma source nits found during QA** (implemented with the correct copy;
+  fix in Figma when convenient): the notification title reads "Notified your
+  **manger**" in the sold-out frames, and the swapped notification shortens
+  the item to "x1 Cajun Fries" while the line item is "Cajun Fries Reg" (the
+  build interpolates the real line name).
+- **Flow 03 intermediate state**: the Figma frames show 7/8 + dimmed row while
+  the Undo notification is visible; the brief says the counter goes to 8/8 and
+  completion immediately. Per ground rules the brief wins — the build shows
+  completion with the Undo notification on top.
+- **Demo shell** (Phase 2): URL deep links `/?flow=04&step=2&branch=extra`
+  replay the script; keyboard → next, ← prev, R reset, 1–5 switch flow;
+  branching steps surface as branch buttons at the branch point; kiosk-gesture
+  steps show a "You do it on the kiosk" hint and also advance when the
+  presenter performs the matching gesture on the kiosk itself.

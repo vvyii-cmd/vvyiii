@@ -33,6 +33,8 @@ export type DetectionFrameModel = {
   variant: FrameVariant;
   /** Pill label; undefined renders no pill. */
   label?: string;
+  /** Pill fill: wrong-item labels sit on white, count labels on black. */
+  labelTone?: "light" | "dark";
   rect: { x: number; y: number; w: number; h: number };
 };
 
@@ -66,6 +68,7 @@ export const detectionFrames = (state: SessionState): DetectionFrameModel[] => {
         key: o.id,
         variant: "red",
         label: o.itemName,
+        labelTone: "light",
         rect: boundingRect([o.slot]),
       });
     }
@@ -73,10 +76,14 @@ export const detectionFrames = (state: SessionState): DetectionFrameModel[] => {
 
   const pendingSwap = state.mat.filter((o) => o.match === "pending_swap");
   if (pendingSwap.length > 0) {
+    const bbox = boundingRect(pendingSwap.map((o) => o.slot));
     frames.push({
       key: `swap_${pendingSwap[0].itemName}`,
       variant: "neutral",
-      rect: boundingRect(pendingSwap.map((o) => o.slot)),
+      label: `${pendingSwap.length}x ${pendingSwap[0].itemName}`,
+      labelTone: "dark",
+      // The swap frame pads wider than tall in the design.
+      rect: { x: bbox.x - 11, y: bbox.y + 5, w: bbox.w + 22, h: bbox.h - 10 },
     });
   }
 
@@ -91,6 +98,7 @@ export const detectionFrames = (state: SessionState): DetectionFrameModel[] => {
       key: `count_${line.id}`,
       variant: line.onMat > line.qty ? "red" : "amber",
       label: `${line.onMat} of ${line.qty} • ${line.name}`,
+      labelTone: "dark",
       rect: boundingRect(objects.map((o) => o.slot)),
     });
   }

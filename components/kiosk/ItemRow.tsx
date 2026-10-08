@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "cn";
 import type { LineItem } from "@/lib/verify/types";
 
-export type ItemRowVisual = "normal" | "struck" | "dimmed";
+export type ItemRowVisual = "normal" | "struck" | "dimmed" | "highlighted";
 
 /** Hold duration before the "What happened?" sheet opens. */
 const LONG_PRESS_MS = 500;
@@ -56,7 +56,7 @@ export function ItemRow({
       onContextMenu={(e) => e.preventDefault()}
       className={cn(
         "flex w-full touch-none items-center justify-between rounded-[8px] text-left select-none",
-        pressing && "bg-black/10 opacity-80",
+        (pressing || visual === "highlighted") && "bg-black/10 opacity-80",
         visual === "dimmed" && "opacity-50",
       )}
       data-line-id={line.id}

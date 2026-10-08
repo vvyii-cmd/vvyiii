@@ -157,7 +157,7 @@ export function reduce(
           ...state.mat,
           ...toObjects(event.itemName, event.placements, true, "wrong"),
         ];
-        return { state: { ...state, mat }, outbound: none };
+        return { state: { ...state, mat, notification: undefined }, outbound: none };
       }
 
       const mat = [
@@ -172,7 +172,12 @@ export function reduce(
       const updated = grown.map((l) =>
         l.id === line.id ? withStatus(l, lineStatusFromMat(l), grown) : l,
       );
-      return settle({ ...state, lines: updated, mat }, now, none);
+      // New world activity supersedes the previous status notification.
+      return settle(
+        { ...state, lines: updated, mat, notification: undefined },
+        now,
+        none,
+      );
     }
 
     case "PLACE_UNRECOGNIZED": {
@@ -247,7 +252,10 @@ export function reduce(
         const next = { ...l, onMat: Math.max(0, l.onMat - removed) };
         return withStatus(next, lineStatusFromMat(next), state.lines);
       });
-      return { state: { ...state, lines, mat }, outbound: none };
+      return {
+        state: { ...state, lines, mat, notification: undefined },
+        outbound: none,
+      };
     }
 
     case "LONG_PRESS_ROW": {

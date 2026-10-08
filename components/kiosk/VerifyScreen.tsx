@@ -1,17 +1,29 @@
+"use client";
+
+import * as React from "react";
 import Image from "next/image";
+import { DWELL_PROMPT_MS } from "@/lib/verify/config";
 import type { OrderIngress } from "@/lib/verify/ingress";
 import type { ScreenEvent, SessionState } from "@/lib/verify/types";
-import { matObjects } from "@/lib/verify/selectors";
+import {
+  activeToast,
+  detectionFrames,
+  matObjects,
+} from "@/lib/verify/selectors";
 import { KioskHeader } from "./KioskHeader";
 import { EmptyState } from "./EmptyState";
 import { OrderPanel } from "./OrderPanel";
 import { CameraStage } from "./CameraStage";
 import { MatObject } from "./MatObject";
+import { DetectionFrame } from "./DetectionFrame";
+import { ActionToast } from "./ActionToast";
+import { Notification } from "./Notification";
+import { WhatHappenedSheet } from "./WhatHappenedSheet";
 
 /**
  * The full kiosk screen for a verification session. Pure function of the
  * session state: it knows nothing about demo flows or the operator console.
- * Screen events (the packer's taps) go out through `dispatch`.
+ * Screen events (the packer's gestures) go out through `dispatch`.
  */
 export function VerifyScreen({
   state,
@@ -22,6 +34,33 @@ export function VerifyScreen({
   ingress: OrderIngress;
   dispatch: (e: ScreenEvent) => void;
 }) {
+  const frames = detectionFrames(state);
+  const toast = activeToast(state);
+  const notification = state.phase === "idle" ? undefined : state.notification;
+  const sheetLine =
+    state.phase === "packing" && state.activeSheetLineId
+      ? state.lines.find((l) => l.id === state.activeSheetLineId)
+      : undefined;
+
+  // Optional dwell prompt (off by default, see lib/verify/config.ts).
+  React.useEffect(() => {
+    if (DWELL_PROMPT_MS <= 0 || state.phase !== "packing" || state.activeSheetLineId)
+      return;
+    const unread = state.mat.find((o) => !o.recognized);
+    if (!unread) return;
+    const line = state.lines.find(
+      (l) =>
+        l.name === unread.itemName &&
+        (l.status === "pending" || l.status === "partial"),
+    );
+    if (!line) return;
+    const id = setTimeout(
+      () => dispatch({ type: "LONG_PRESS_ROW", lineId: line.id }),
+      DWELL_PROMPT_MS,
+    );
+    return () => clearTimeout(id);
+  }, [state, dispatch]);
+
   return (
     <div className="relative flex h-full w-full flex-col items-start">
       {/* Kitchen backdrop, cropped exactly as the Figma hero screen crops it. */}
@@ -36,10 +75,13 @@ export function VerifyScreen({
         />
       </div>
 
-      {/* Physical objects live on the canvas layer, under the UI chrome. */}
+      {/* Physical objects and detection frames live on the canvas layer. */}
       <div className="pointer-events-none absolute inset-0">
         {matObjects(state).map((o) => (
           <MatObject key={o.id} object={o} />
+        ))}
+        {frames.map((f) => (
+          <DetectionFrame key={f.key} model={f} />
         ))}
       </div>
 
@@ -59,11 +101,28 @@ export function VerifyScreen({
             lines={state.lines}
             phase={state.phase}
             recordedAt={state.phase === "complete" ? state.recordedAt : undefined}
+            activeSheetLineId={
+              state.phase === "packing" ? state.activeSheetLineId : undefined
+            }
+            swapPendingLineId={
+              // The line strikes through once the replacement is on the mat.
+              state.phase === "packing" &&
+              state.mat.some((o) => o.match === "pending_swap")
+                ? state.swapPendingLineId
+                : undefined
+            }
             dispatch={dispatch}
           />
         )}
-        <CameraStage complete={state.phase === "complete"} />
+        <CameraStage complete={state.phase === "complete"}>
+          {toast ? <ActionToast toast={toast} /> : null}
+          {notification ? (
+            <Notification notification={notification} dispatch={dispatch} />
+          ) : null}
+        </CameraStage>
       </div>
+
+      {sheetLine ? <WhatHappenedSheet line={sheetLine} dispatch={dispatch} /> : null}
     </div>
   );
 }

@@ -137,6 +137,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Kiosk notification: slides in from the right edge of the stage. */
+@keyframes kiosk-slide-in {
+  from {
+    transform: translateX(calc(100% + 24px));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
